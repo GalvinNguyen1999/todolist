@@ -44,6 +44,58 @@ class _TodoListScreenState extends State<TodoListScreen> {
     Todo(id: '5', title: 'Đọc sách', isCompleted: false),
   ];
 
+  void _addTodo(String title) {
+    setState(() {
+      todos.add(
+        Todo(
+          id: (todos.length + 1).toString(),
+          title: title,
+          isCompleted: false,
+        ),
+      );
+    });
+  }
+
+  void _showAddTodoDialog() {
+    final TextEditingController controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Thêm todo mới'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              hintText: 'Nhập công việc...',
+              border: OutlineInputBorder(),
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                controller.clear();
+              },
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (controller.text.trim().isNotEmpty) {
+                  _addTodo(controller.text.trim());
+                  Navigator.pop(context);
+                  controller.clear();
+                }
+              },
+              child: const Text('Thêm'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,7 +107,10 @@ class _TodoListScreenState extends State<TodoListScreen> {
           icon: const Icon(Icons.menu),
         ),
         actions: [
-          const IconButton(onPressed: null, icon: const Icon(Icons.add)),
+          IconButton(
+            onPressed: _showAddTodoDialog,
+            icon: const Icon(Icons.add),
+          ),
         ],
       ),
       body: Padding(

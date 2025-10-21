@@ -56,6 +56,39 @@ class _TodoListScreenState extends State<TodoListScreen> {
     });
   }
 
+  void _deleteTodo(String id) {
+    setState(() {
+      todos.removeWhere((todo) => todo.id == id);
+    });
+  }
+
+  void _showDeleteTodoDialog(String id) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Xóa todo'),
+          content: const Text('Bạn có chắc chắn muốn xóa todo này không?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _deleteTodo(id);
+              },
+              child: const Text('Xóa'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _showAddTodoDialog() {
     final TextEditingController controller = TextEditingController();
 
@@ -147,7 +180,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                       icon: Icon(Icons.edit, color: Colors.blue),
                     ),
                     IconButton(
-                      onPressed: null,
+                      onPressed: () => _showDeleteTodoDialog(todo.id),
                       icon: Icon(Icons.delete, color: Colors.red),
                     ),
                   ],

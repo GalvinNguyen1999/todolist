@@ -89,16 +89,28 @@ class _TodoListScreenState extends State<TodoListScreen> {
     }
   }
 
-  void _addTodo(String title) {
-    setState(() {
-      todos.add(
-        Todo(
-          id: (todos.length + 1).toString(),
-          title: title,
-          isCompleted: false,
-        ),
+  Future<void> _addTodo(String title) async {
+    try {
+      final res = await post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'title': title,
+          'isCompleted': false,
+        })
       );
-    });
+
+      if (res.statusCode == 201) {
+        _fetchTodos();
+        _showSuccessSnackBar('Đã thêm todo');
+      } else {
+        throw Exception('Failed to add todo');
+      }
+    } catch (e) {
+      _showErrorSnackBar('Lỗi: ${e.toString()}');
+    }
   }
 
   void _deleteTodo(String id) {
@@ -218,6 +230,26 @@ class _TodoListScreenState extends State<TodoListScreen> {
           ],
         );
       },
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 3),
+      )
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      )
     );
   }
 

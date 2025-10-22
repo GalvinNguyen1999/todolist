@@ -93,13 +93,8 @@ class _TodoListScreenState extends State<TodoListScreen> {
     try {
       final res = await post(
         Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'title': title,
-          'isCompleted': false,
-        })
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'title': title, 'isCompleted': false}),
       );
 
       if (res.statusCode == 201) {
@@ -119,11 +114,30 @@ class _TodoListScreenState extends State<TodoListScreen> {
     });
   }
 
-  void _editTodo(String id, String title) {
-    setState(() {
-      final todo = todos.firstWhere((todo) => todo.id == id);
-      todo.title = title;
-    });
+  // void _editTodo(String id, String title) {
+  //   setState(() {
+  //     final todo = todos.firstWhere((todo) => todo.id == id);
+  //     todo.title = title;
+  //   });
+  // }
+
+  Future<void> _editTodo(String id, String title) async {
+    try {
+      final res = await put(
+        Uri.parse('$apiUrl/$id'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'title': title}),
+      );
+
+      if (res.statusCode == 200) {
+        _fetchTodos();
+        _showSuccessSnackBar('Đã cập nhật todo');
+      } else {
+        throw Exception('Failed to update todo');
+      }
+    } catch (e) {
+      _showErrorSnackBar('Lỗi: ${e.toString()}');
+    }
   }
 
   void _showDeleteTodoDialog(String id) {
@@ -239,7 +253,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
         content: Text(message),
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 3),
-      )
+      ),
     );
   }
 
@@ -249,7 +263,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
         content: Text(message),
         backgroundColor: Colors.red,
         duration: const Duration(seconds: 3),
-      )
+      ),
     );
   }
 

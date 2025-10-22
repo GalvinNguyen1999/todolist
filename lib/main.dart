@@ -108,18 +108,22 @@ class _TodoListScreenState extends State<TodoListScreen> {
     }
   }
 
-  void _deleteTodo(String id) {
-    setState(() {
-      todos.removeWhere((todo) => todo.id == id);
-    });
-  }
+  Future<void> _deleteTodo(String id) async {
+    try {
+      final res = await delete(
+        Uri.parse('$apiUrl/$id')
+      );
 
-  // void _editTodo(String id, String title) {
-  //   setState(() {
-  //     final todo = todos.firstWhere((todo) => todo.id == id);
-  //     todo.title = title;
-  //   });
-  // }
+      if (res.statusCode == 200) {
+        _fetchTodos();
+        _showSuccessSnackBar('Đã xóa todo');
+      } else {
+        throw Exception('Failed to delete todo');
+      }
+    } catch (e) {
+      _showErrorSnackBar('Lỗi: ${e.toString()}');
+    }
+  }
 
   Future<void> _editTodo(String id, String title) async {
     try {

@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
 
 class Todo {
   final String id;
-  final String title;
+  String title;
   bool isCompleted;
 
   Todo({required this.id, required this.title, this.isCompleted = false});
@@ -59,6 +59,13 @@ class _TodoListScreenState extends State<TodoListScreen> {
   void _deleteTodo(String id) {
     setState(() {
       todos.removeWhere((todo) => todo.id == id);
+    });
+  }
+
+  void _editTodo(String id, String title) {
+    setState(() {
+      final todo = todos.firstWhere((todo) => todo.id == id);
+      todo.title = title;
     });
   }
 
@@ -129,6 +136,46 @@ class _TodoListScreenState extends State<TodoListScreen> {
     );
   }
 
+  void _showEditTodoDiaLog(String id, String title) {
+    final TextEditingController controller = TextEditingController(text: title);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Chỉnh sửa todo'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              hintText: 'Nhập công việc...',
+              border: OutlineInputBorder(),
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                controller.clear();
+              },
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (controller.text.trim().isNotEmpty) {
+                  _editTodo(id, controller.text.trim());
+                  Navigator.pop(context);
+                  controller.clear();
+                }
+              },
+              child: const Text('Lưu'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,7 +223,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      onPressed: null,
+                      onPressed: () => _showEditTodoDiaLog(todo.id, todo.title),
                       icon: Icon(Icons.edit, color: Colors.blue),
                     ),
                     IconButton(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'dart:convert';
 
 void main() {
   runApp(const MyApp());
@@ -24,6 +26,20 @@ class Todo {
   bool isCompleted;
 
   Todo({required this.id, required this.title, this.isCompleted = false});
+
+  // Parse JSON to Todo object
+  factory Todo.fromJson(Map<String, dynamic> json) {
+    return Todo(
+      id: json['id'].toString(),
+      title: json['title'],
+      isCompleted: json['isCompleted'] ?? false,
+    );
+  }
+
+  // Convert Todo object to JSON
+  Map<String, dynamic> toJson() {
+    return {'title': title, 'isCompleted': isCompleted};
+  }
 }
 
 class TodoListScreen extends StatefulWidget {
@@ -36,13 +52,42 @@ class TodoListScreen extends StatefulWidget {
 }
 
 class _TodoListScreenState extends State<TodoListScreen> {
-  List<Todo> todos = [
-    Todo(id: '1', title: 'Học Flutter', isCompleted: true),
-    Todo(id: '2', title: 'Làm bài tập về nhà', isCompleted: false),
-    Todo(id: '3', title: 'Đi chợ mua rau', isCompleted: false),
-    Todo(id: '4', title: 'Tập thể dục', isCompleted: true),
-    Todo(id: '5', title: 'Đọc sách', isCompleted: false),
-  ];
+  List<Todo> todos = [];
+  bool isLoading = false;
+
+  final String apiUrl = 'https://68f88645deff18f212b661e3.mockapi.io/todos';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTodos();
+  }
+
+  // Get todos from API
+  Future<void> _fetchTodos() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final response = await get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+
+        setState(() {
+          todos = jsonData.map((json) => Todo.fromJson(json)).toList();
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load todos');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   void _addTodo(String title) {
     setState(() {

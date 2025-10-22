@@ -110,9 +110,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   Future<void> _deleteTodo(String id) async {
     try {
-      final res = await delete(
-        Uri.parse('$apiUrl/$id')
-      );
+      final res = await delete(Uri.parse('$apiUrl/$id'));
 
       if (res.statusCode == 200) {
         _fetchTodos();
@@ -138,6 +136,25 @@ class _TodoListScreenState extends State<TodoListScreen> {
         _showSuccessSnackBar('Đã cập nhật todo');
       } else {
         throw Exception('Failed to update todo');
+      }
+    } catch (e) {
+      _showErrorSnackBar('Lỗi: ${e.toString()}');
+    }
+  }
+
+  Future<void> _toggleTodoStatus(Todo todo) async {
+    try {
+      final res = await put(
+        Uri.parse('$apiUrl/${todo.id}'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'isCompleted': !todo.isCompleted}),
+      );
+
+      if (res.statusCode == 200) {
+        _fetchTodos();
+        _showSuccessSnackBar('Đã cập nhật trạng thái todo');
+      } else {
+        throw Exception('Failed to update todo status');
       }
     } catch (e) {
       _showErrorSnackBar('Lỗi: ${e.toString()}');
@@ -309,9 +326,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 leading: Checkbox(
                   value: todo.isCompleted,
                   onChanged: (value) {
-                    setState(() {
-                      todo.isCompleted = value ?? false;
-                    });
+                    _toggleTodoStatus(todo);
                   },
                 ),
                 trailing: Row(
